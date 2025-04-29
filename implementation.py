@@ -39,4 +39,3 @@ with open("nejm_subset.jsonl", "r") as f:
         print(scenario.diagnosis_information())
         print("-" * 50)
         
-        
