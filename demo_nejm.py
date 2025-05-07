@@ -41,7 +41,6 @@ def get_case_summary(scenario_dict):
     patient_info = scenario_dict.get("patient_info", "N/A")
     physical_exams = scenario_dict.get("physical_exams", "N/A")
     return f"Question:\n{question}\n\nPatient Information:\n{patient_info}\n\nPhysical Examination Findings:\n{physical_exams}"
-
 # retrieve correct diagnosis
 def get_correct_diagnosis(scenario_dict):
     answers = scenario_dict.get("answers", [])
@@ -163,6 +162,12 @@ def run_demo():
     save_run_data(run_data)
 
 if __name__ == "__main__":
-    # run script
-    run_demo()
-    
+    for i in range(4):
+        '''if i == 2:
+            DATA_FILE = "agentclinic_nejm_extended.jsonl"
+        if i == 3:
+            DATA_FILE = "agentclinic_medqa.jsonl"
+        if i == 4:
+            DATA_FILE = "agentclinic_medqa_extended.jsonl"'''
+        run_demo()
+        NUM_INTERACTION_TURNS += 2

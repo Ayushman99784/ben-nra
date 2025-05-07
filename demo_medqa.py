@@ -8,8 +8,8 @@ import datetime
 API_KEY = os.environ.get("OPENAI_API_KEY")
 openai.api_key = API_KEY
 
-DATA_FILE = "agentclinic_nejm.jsonl"
-LOG_FILE = "demo_log.json"
+DATA_FILE = "agentclinic_medqa.jsonl"
+LOG_FILE = "medqa_demo_log.json"
 DOCTOR_MODEL = "gpt-4.1-nano"
 MODERATOR_MODEL = "gpt-4.1-nano"
 NUM_INTERACTION_TURNS = 3
@@ -37,18 +37,22 @@ def load_and_select_scenario(filepath=DATA_FILE):
 
 # build case summary
 def get_case_summary(scenario_dict):
-    question = scenario_dict.get("question", "N/A")
-    patient_info = scenario_dict.get("patient_info", "N/A")
-    physical_exams = scenario_dict.get("physical_exams", "N/A")
-    return f"Question:\n{question}\n\nPatient Information:\n{patient_info}\n\nPhysical Examination Findings:\n{physical_exams}"
-
+    
+    osce = scenario_dict.get("OSCE_Examination", {})
+    question = osce.get("Objective_for_Doctor", "N/A")
+    patient_info = osce.get("Patient_Actor", {}).get("History", "N/A")
+    physical_exams = osce.get("Physical_Examination_Findings", {})
+    physical_exam_summary = "\n".join(
+        [f"{key}: {value}" for key, value in physical_exams.items()]
+    )
+    return f"Question:\n{question}\n\nPatient Information:\n{patient_info}\n\nPhysical Examination Findings:\n{physical_exam_summary}"
 # retrieve correct diagnosis
 def get_correct_diagnosis(scenario_dict):
-    answers = scenario_dict.get("answers", [])
-    for answer in answers:
-        if answer.get("correct"):
-            return answer.get("text", "Correct diagnosis not found")
-    return "Correct diagnosis not specified in data"
+    """
+    Retrieve the correct diagnosis from the MedQA scenario dictionary.
+    """
+    osce = scenario_dict.get("OSCE_Examination", {})
+    return osce.get("Correct_Diagnosis", "Correct diagnosis not found")
 
 # save run results
 def save_run_data(run_data, filepath=LOG_FILE):
@@ -73,7 +77,7 @@ def run_demo():
     scenario = load_and_select_scenario()
     case_summary = get_case_summary(scenario)
     correct_diagnosis = get_correct_diagnosis(scenario)
-    question = scenario.get("question", "Question not found")
+    question = scenario.get("OSCE_Examination", {}).get("Objective_for_Doctor", "Question not found")
 
     print(f">>> Scenario: {question}")
 
@@ -163,5 +167,7 @@ def run_demo():
     save_run_data(run_data)
 
 if __name__ == "__main__":
-    # run script
-    run_demo()
+    for i in range(3):
+        NUM_INTERACTION_TURNS += 2
+        run_demo()
+    
